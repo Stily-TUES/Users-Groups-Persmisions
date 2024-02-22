@@ -1,16 +1,12 @@
-package com.example.tuesdb.controllers;
-
-import com.example.tuesdb.dtos.BikeDto;
-import com.example.tuesdb.dtos.PersonDto;
+import com.example.tuesdb.dtos.GroupDto;
+import com.example.tuesdb.dtos.PermissionDto;
+import com.example.tuesdb.dtos.UserDto;
+import com.example.tuesdb.models.User;
 import com.example.tuesdb.repositories.TuesRepository;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class Controller {
@@ -21,50 +17,38 @@ public class Controller {
         this.tuesRepository = tuesRepository;
     }
 
-    @GetMapping(value = "/person")
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(tuesRepository.getAll());
+    @GetMapping(value = "/users")
+    public ResponseEntity<?> getAllUsers() {
+        List<UserDto> userDtos = tuesRepository.getAllUsers()
+                .stream()
+                .map(UserDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userDtos);
     }
 
-    @PostMapping(value = "/person", consumes = MediaType.APPLICATION_JSON_VALUE)
-
-    public ResponseEntity<?> createPerson(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(
-                            examples = {
-                                    @ExampleObject(name = "Create-1", value = """
-                                            {
-                                              "firstName": "Nathan",
-                                              "lastName": "Lisochovich",
-                                              "email": "nat@abv.bg"
-                                            }""")
-                            }
-                    )
-            )
-            @RequestBody PersonDto personDto
-    ) {
-        tuesRepository.createPerson(personDto);
-        return ResponseEntity.ok().build();
+    @PostMapping(value = "/user", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createUser(@RequestBody UserDto userInputDto) {
+        // Assuming there's a method to convert UserInputDto to User
+        User newUser = userInputDto.toUser();
+        UserDto createdUserDto = new UserDto(tuesRepository.createUser(newUser));
+        return ResponseEntity.ok(createdUserDto);
     }
 
-    @PostMapping(value = "/bike", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createBike(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(
-                            examples = {
-                                    @ExampleObject(name = "Create-1", value = """
-                                                                                     
-                                            {
-                                              "make": "Kawasaki",
-                                              "model": "Ninja 636",
-                                              "personId": 1
-                                            }""")
-                            }
-                    )
-            )
-            @RequestBody BikeDto bikeDto
-    ) {
-        tuesRepository.createBike(bikeDto);
-        return ResponseEntity.ok().build();
+    @GetMapping(value = "/groups")
+    public ResponseEntity<?> getAllGroups() {
+        List<GroupDto> groupDtos = tuesRepository.getAllGroups()
+                .stream()
+                .map(GroupDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(groupDtos);
+    }
+
+    @GetMapping(value = "/permissions")
+    public ResponseEntity<?> getAllPermissions() {
+        List<PermissionDto> permissionDtos = tuesRepository.getAllPermissions()
+                .stream()
+                .map(PermissionDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(permissionDtos);
     }
 }

@@ -1,17 +1,17 @@
 package com.example.tuesdb.repositories;
 
-import com.example.tuesdb.dtos.BikeDto;
-import com.example.tuesdb.dtos.PersonDto;
-import com.example.tuesdb.models.Bike;
-import com.example.tuesdb.models.Person;
+import com.example.tuesdb.dtos.GroupDto;
+import com.example.tuesdb.dtos.PermissionDto;
+import com.example.tuesdb.dtos.UserDto;
+import com.example.tuesdb.models.Group;
+import com.example.tuesdb.models.Permission;
+import com.example.tuesdb.models.User;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
-import org.springframework.util.CollectionUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Repository
@@ -22,55 +22,49 @@ public class TuesRepository {
         this.entityManager = entityManager;
     }
 
-    @Transactional
-    public Person createPerson(PersonDto personDto) {
-        Person newPerson = new Person();
-        newPerson.setEmail(personDto.getEmail());
-        newPerson.setFirstName(personDto.getFirstName());
-        newPerson.setLastName(personDto.getLastName());
-
-        if (!CollectionUtils.isEmpty(personDto.getBikes())) {
-
-            Set<Long> bikeIds = personDto.getBikes().stream().map(BikeDto::getId).collect(Collectors.toSet());
-
-            TypedQuery<Bike> q = entityManager.createQuery("select b from Bike b where id in (:in)", Bike.class);
-            q.setParameter("in", bikeIds);
-
-            List<Bike> bikes = q.getResultList();
-
-            if (CollectionUtils.isEmpty(bikes)) {
-                throw new RuntimeException("Bikes not found");
-            }
-
-            newPerson.setBikes(new HashSet<>(bikes));
-        }
-
-        entityManager.persist(newPerson);
-
-        return newPerson;
+    public List<UserDto> getAllUsers() {
+        return entityManager.createQuery("SELECT u FROM User u", User.class)
+                .getResultList()
+                .stream()
+                .map(UserDto::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public Bike createBike(BikeDto bikeDto) {
-        Bike newBike = new Bike();
-        newBike.setMake(bikeDto.getMake());
-        newBike.setModel(bikeDto.getModel());
+    public UserDto createUser(UserDto userInputDto) {
+        User newUser = new User();
 
-        if (bikeDto.getPersonId() != null) {
-            Person owner = entityManager.find(Person.class, bikeDto.getPersonId());
-            if (owner == null) {
-                throw new RuntimeException("Person not found");
-            }
-            newBike.setOwner(owner);
-        }
+        newUser.setUsername(userInputDto.getUsername());
+        newUser.setPassword(new BCryptPasswordEncoder().encode(userInputDto.getPassword()));
+        newUser.setFirstName(userInputDto.getFirstName());
+        newUser.setLastName(userInputDto.getLastName());
+        newUser.setPermissions(userInputDto.getPermissions()
+                .stream()
+                .map(permissionDto -> entityManager.find(Permission.class, permissionDto.getId()))
+                .collect(Collectors.toSet()));
+        newUser.setGroups(userInputDto.getGroups()
+                .stream()
+                .map(groupDto -> entityManager.find(Group.class, groupDto.getId()))
+                .collect(Collectors.toSet()));
 
-        entityManager.persist(newBike);
+        entityManager.persist(newUser);
 
-        return newBike;
+        return new UserDto(newUser);
     }
 
-    public List<PersonDto> getAll() {
-        return entityManager.createQuery("select p from Person p", Person.class)
-                .getResultList().stream().map(PersonDto::new).toList();
+    public List<GroupDto> getAllGroups() {
+        return entityManager.createQuery("SELECT g FROM Group g", Group.class)
+                .getResultList()
+                .stream()
+                .map(GroupDto::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<PermissionDto> getAllPermissions() {
+        return entityManager.createQuery("SELECT p FROM Permission p", Permission.class)
+                .getResultList()
+                .stream()
+                .map(PermissionDto::new)
+                .collect(Collectors.toList());
     }
 }
