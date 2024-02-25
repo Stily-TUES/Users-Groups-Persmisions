@@ -1,8 +1,6 @@
 package com.example.tuesdb.dtos;
 
-import com.example.tuesdb.models.Group;
 import com.example.tuesdb.models.Permission;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Collections;
@@ -27,6 +25,7 @@ public class PermissionDto {
                 .map(GroupDto::new)
                 .collect(Collectors.toSet());
     }
+
     public long getId() {
         return id;
     }
@@ -35,7 +34,7 @@ public class PermissionDto {
         this.id = id;
     }
 
-    public String setPermissionType() {
+    public String getPermissionType() {
         return permissionType;
     }
 

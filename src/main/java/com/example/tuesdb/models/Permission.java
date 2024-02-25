@@ -1,7 +1,6 @@
 package com.example.tuesdb.models;
-import jakarta.persistence.*;
-import org.springframework.context.annotation.EnableMBeanExport;
 
+import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity
@@ -15,7 +14,6 @@ public class Permission {
 
     @ManyToMany
     private Set<Group> groups;
-
 
     public long getId() {
         return id;

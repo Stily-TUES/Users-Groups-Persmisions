@@ -10,7 +10,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,5 +65,13 @@ public class TuesRepository {
                 .stream()
                 .map(PermissionDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Permission createPermission(PermissionDto permissionDto) {
+        Permission newPermission = new Permission();
+        newPermission.setPermissionType(permissionDto.getPermissionType());
+
+        return newPermission;
     }
 }

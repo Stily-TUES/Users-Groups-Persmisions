@@ -1,6 +1,5 @@
 package com.example.tuesdb.dtos;
 
-import com.example.tuesdb.models.Permission;
 import com.example.tuesdb.models.Group;
 import jakarta.validation.constraints.NotBlank;
 

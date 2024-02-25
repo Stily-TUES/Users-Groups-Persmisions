@@ -1,12 +1,8 @@
 package com.example.tuesdb.dtos;
 
-import com.example.tuesdb.models.Group;
-import com.example.tuesdb.models.Permission;
 import com.example.tuesdb.models.User;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
-import java.security.PublicKey;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -29,7 +25,6 @@ public class UserDto {
 
     private Set<GroupDto> groups = new HashSet<>();
 
-
     public UserDto(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
@@ -47,7 +42,6 @@ public class UserDto {
                 .map(GroupDto::new)
                 .collect(Collectors.toSet());
     }
-
 
     public Long getId() {
         return id;
